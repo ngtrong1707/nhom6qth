@@ -1,0 +1,549 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap');
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    --red-dark: #6b0e08;
+    --red-mid: #a81810;
+    --red-bright: #d4291e;
+    --gold: #ffc300;
+    --gold-dark: #e0a800;
+    --white-glass: rgba(255, 255, 255, 0.12);
+    --white-border: rgba(255, 255, 255, 0.25);
+    --shadow-deep: 0 20px 60px rgba(0, 0, 0, 0.5);
+    --glow-gold: 0 0 25px rgba(255, 195, 0, 0.4);
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background: #140302;
+    color: #fff;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+}
+
+/* Full-screen animated canvas sits behind everything */
+#bg-canvas {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+    display: block;
+}
+
+/* Subtle radial glow overlay */
+body::before {
+    content: '';
+    position: fixed;
+    top: -30%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 120%;
+    height: 160%;
+    background: radial-gradient(ellipse at center, rgba(255, 180, 0, 0.08) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* ── SCREENS ── */
+.screen {
+    display: none;
+    width: 100%;
+    min-height: 100vh;
+    padding: 2rem 1.5rem;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    z-index: 1;
+}
+
+.screen.active {
+    display: flex;
+    animation: fadeSlideIn 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes fadeSlideIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+
+/* ── HOME PANEL ── */
+.glass-panel {
+    background: rgba(255, 255, 255, 0.06);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 28px;
+    padding: 3.5rem 3rem;
+    box-shadow: var(--shadow-deep), inset 0 1px 0 rgba(255,255,255,0.1);
+    text-align: center;
+    max-width: 960px;
+    width: 100%;
+}
+
+/* ── TITLE ── */
+.game-title {
+    font-size: clamp(2.4rem, 5vw, 4rem);
+    font-weight: 900;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--gold);
+    text-shadow: 0 0 30px rgba(255, 195, 0, 0.6), 0 4px 10px rgba(0,0,0,0.4);
+    margin-bottom: 0.4rem;
+}
+
+.subtitle {
+    font-size: 1.05rem;
+    font-weight: 500;
+    color: rgba(255,255,255,0.65);
+    margin-bottom: 2.5rem;
+    letter-spacing: 0.02em;
+}
+
+
+/* ── CHICKEN GRID ── */
+.chicken-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 22px;
+}
+
+.chicken-btn {
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1.5px solid rgba(255, 255, 255, 0.2);
+    padding: 22px 16px 18px;
+    border-radius: 22px;
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: var(--gold);
+    letter-spacing: 0.03em;
+    cursor: pointer;
+    box-shadow: 0 8px 28px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.08);
+    transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    position: relative;
+    overflow: hidden;
+}
+
+/* inner shine */
+.chicken-btn::after {
+    content: '';
+    position: absolute;
+    top: 0; left: -60%;
+    width: 50%; height: 100%;
+    background: linear-gradient(100deg, transparent, rgba(255,255,255,0.08), transparent);
+    transform: skewX(-25deg);
+    transition: left 0.5s ease;
+    pointer-events: none;
+}
+
+.chicken-btn:hover::after { left: 120%; }
+
+/* Image wrapper: stacks base and check icon */
+.chicken-img-wrap {
+    position: relative;
+    width: auto;
+    height: 110px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Dark overlay that hides the chicken until correctly answered */
+.chicken-dark {
+    position: absolute;
+    inset: 0;
+    border-radius: 8px;
+    background: rgba(0, 0, 0, 0.75);
+    backdrop-filter: brightness(0.1) saturate(0);
+    -webkit-backdrop-filter: brightness(0.1) saturate(0);
+    transition: opacity 0.6s ease, backdrop-filter 0.6s ease;
+    pointer-events: none;
+    z-index: 2;
+}
+
+/* Keep .chicken-base for the base image */
+.chicken-base {
+    height: 110px;
+    width: auto;
+    object-fit: contain;
+    transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), filter 0.35s;
+    display: block;
+    position: relative;
+    z-index: 1;
+    filter: drop-shadow(0 6px 10px rgba(0,0,0,0.4));
+}
+
+/* PPT checkmark overlay slot – now unused; kept for safe removal */
+.chicken-check { display: none; }
+
+/* When solved-correct: the image-wrap grows a vivid gold ring */
+.chicken-btn.solved-correct .chicken-img-wrap::after {
+    content: '';
+    position: absolute;
+    inset: -6px;
+    border-radius: 50%;
+    border: 4px solid var(--gold);
+    box-shadow: 0 0 20px rgba(255,200,0,0.8), inset 0 0 10px rgba(255,200,0,0.3);
+    animation: ringPulse 1.2s ease-in-out infinite;
+    pointer-events: none;
+}
+
+@keyframes ringPulse {
+    0%,100% { opacity: 1;  transform: scale(1); }
+    50%      { opacity: 0.7; transform: scale(1.08); }
+}
+
+.chicken-btn:hover {
+    transform: translateY(-10px) scale(1.04);
+    border-color: var(--gold);
+    box-shadow: 0 18px 40px rgba(0,0,0,0.45), var(--glow-gold), inset 0 1px 0 rgba(255,255,255,0.12);
+    background: rgba(255, 255, 255, 0.15);
+}
+
+.chicken-btn:hover .chicken-sprite,
+.chicken-btn:hover .chicken-base {
+    transform: scale(1.12) rotate(4deg);
+    filter: drop-shadow(0 12px 18px rgba(255, 195, 0, 0.35)) brightness(1.08);
+}
+
+.chicken-btn:active {
+    transform: scale(0.97);
+}
+
+.chicken-btn.solved {
+    /* base solved state – only used as fallback */
+    cursor: not-allowed;
+    transform: none !important;
+}
+
+.chicken-btn.solved img {
+    transform: none !important;
+}
+
+/* ✅ Solved-correct: lift the darkness, reveal the chicken! */
+.chicken-btn.solved-correct {
+    cursor: not-allowed;
+    border-color: var(--gold);
+    background: rgba(255, 195, 0, 0.15);
+    animation: chickenGlow 2s ease-in-out infinite;
+    transform: none !important;
+}
+
+/* Lift the dark overlay completely */
+.chicken-btn.solved-correct .chicken-dark {
+    opacity: 0;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+}
+
+/* Reveal the full-color, glowing chicken image */
+.chicken-btn.solved-correct .chicken-base {
+    filter: drop-shadow(0 0 16px rgba(255,210,0,0.9)) brightness(1.2) saturate(1.2);
+    transform: scale(1.06) !important;
+}
+
+/* Label text turns gold */
+.chicken-btn.solved-correct span {
+    color: var(--gold);
+    text-shadow: 0 0 10px rgba(255,195,0,0.7);
+}
+
+@keyframes chickenGlow {
+    0%, 100% { box-shadow: 0 0 20px rgba(255,195,0,0.45), 0 0 40px rgba(255,140,0,0.2); }
+    50%       { box-shadow: 0 0 40px rgba(255,195,0,0.9), 0 0 80px rgba(255,200,0,0.5); }
+}
+
+
+/* ── QUESTION SCREEN ── */
+.question-container {
+    width: 100%;
+    max-width: 960px;
+    position: relative;
+    background: rgba(255, 255, 255, 0.07);
+    padding: 50px 48px 44px;
+    border-radius: 28px;
+    box-shadow: var(--shadow-deep), inset 0 1px 0 rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.16);
+    z-index: 1;
+}
+
+.glass-btn {
+    position: absolute;
+    top: 22px;
+    left: 22px;
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.25);
+    color: rgba(255,255,255,0.85);
+    padding: 9px 18px;
+    border-radius: 50px;
+    cursor: pointer;
+    font-size: 0.95rem;
+    font-weight: 700;
+    font-family: 'Inter', sans-serif;
+    transition: all 0.2s;
+    z-index: 10;
+    letter-spacing: 0.02em;
+}
+
+.glass-btn:hover {
+    background: rgba(255,255,255,0.22);
+    border-color: var(--gold);
+    color: var(--gold);
+}
+
+/* Mascot fixed at bottom-right corner */
+.mascot-inline {
+    position: fixed;
+    right: 20px;
+    bottom: -10px;
+    height: 280px;
+    width: auto;
+    z-index: 50;
+    filter: drop-shadow(0 10px 20px rgba(0,0,0,0.55));
+    animation: floatMascot 4s ease-in-out infinite;
+    pointer-events: none;
+}
+
+@keyframes floatMascot {
+    0%, 100% { transform: translateY(0) rotate(0deg); }
+    50%       { transform: translateY(-16px) rotate(3deg); }
+}
+
+/* Orbiting hero chicken from Slide 1 – behind the question card */
+.orbit-chicken {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    width: 300px;
+    opacity: 0.15;
+    pointer-events: none;
+    z-index: 0;
+    filter: drop-shadow(0 0 25px rgba(255,180,0,0.35));
+    animation: orbitAround 20s linear infinite;
+    transform-origin: center center;
+}
+
+@keyframes orbitAround {
+    0%   { transform: rotate(0deg)   translateX(42vw) rotate(0deg);   }
+    100% { transform: rotate(360deg) translateX(42vw) rotate(-360deg); }
+}
+
+/* ── QUESTION HEADER ── */
+.q-header {
+    text-align: center;
+    margin-bottom: 20px;
+    margin-top: 10px;
+}
+
+.q-badge {
+    display: inline-block;
+    background: var(--gold);
+    color: #000;
+    font-size: 1rem;
+    font-weight: 900;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    padding: 6px 26px;
+    border-radius: 50px;
+    box-shadow: 0 4px 14px rgba(255, 195, 0, 0.45);
+}
+
+.question-box {
+    background: rgba(0, 0, 0, 0.35);
+    border: 1.5px solid rgba(255, 195, 0, 0.4);
+    border-radius: 18px;
+    padding: 32px 40px;
+    font-size: clamp(1.15rem, 2.2vw, 1.55rem);
+    font-weight: 700;
+    text-align: center;
+    line-height: 1.55;
+    margin-bottom: 34px;
+    box-shadow: 0 0 40px rgba(255,195,0,0.06), inset 0 2px 0 rgba(255,255,255,0.05);
+    color: #fff;
+}
+
+/* ── ANSWER GRID ── */
+.answers-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+.answer-btn {
+    background: rgba(255,255,255,0.07);
+    border: 1.5px solid rgba(255,255,255,0.2);
+    padding: 18px 22px;
+    border-radius: 14px;
+    font-size: clamp(0.95rem, 1.5vw, 1.2rem);
+    font-family: 'Inter', sans-serif;
+    font-weight: 600;
+    color: rgba(255,255,255,0.9);
+    text-align: left;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.22, 1, 0.36, 1);
+    line-height: 1.4;
+    position: relative;
+    overflow: hidden;
+}
+
+.answer-btn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(255,255,255,0);
+    transition: background 0.2s;
+    border-radius: inherit;
+}
+
+.answer-btn:hover {
+    background: rgba(255,255,255,0.14);
+    border-color: var(--gold);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.35), var(--glow-gold);
+    color: #fff;
+}
+
+.answer-btn .letter {
+    background: var(--gold);
+    color: #000;
+    font-weight: 900;
+    font-size: 1rem;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.3);
+    letter-spacing: 0;
+}
+
+.answer-btn.correct {
+    background: linear-gradient(135deg, #0a6b38, #0d9e51) !important;
+    border-color: #00e676 !important;
+    box-shadow: 0 0 30px rgba(0, 230, 118, 0.45) !important;
+    color: #fff;
+    animation: pulseGreen 0.7s ease;
+}
+
+.answer-btn.correct .letter { background: #00e676; color: #000; }
+
+.answer-btn.wrong {
+    background: linear-gradient(135deg, #7a1010, #b52121) !important;
+    border-color: #ff5252 !important;
+    box-shadow: 0 0 25px rgba(255, 82, 82, 0.4) !important;
+    color: #fff;
+    animation: shakeIt 0.4s ease;
+}
+
+.answer-btn.wrong .letter { background: #ff5252; color: #fff; }
+
+@keyframes pulseGreen {
+    0% { box-shadow: 0 0 0 rgba(0,230,118,0); }
+    50% { box-shadow: 0 0 40px rgba(0,230,118,0.6); }
+    100% { box-shadow: 0 0 30px rgba(0,230,118,0.45); }
+}
+
+@keyframes shakeIt {
+    0%,100% { transform: translateX(0); }
+    20% { transform: translateX(-8px); }
+    60% { transform: translateX(8px); }
+    80% { transform: translateX(-5px); }
+}
+
+
+/* ── MODAL ── */
+.modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.72);
+    backdrop-filter: blur(8px);
+    z-index: 200;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal.active {
+    display: flex;
+    animation: fadeSlideIn 0.3s ease;
+}
+
+.modal-content.glass-panel {
+    max-width: 480px;
+    padding: 2.8rem 3rem;
+    text-align: center;
+}
+
+.modal-icon {
+    font-size: 4rem;
+    margin-bottom: 0.5rem;
+    line-height: 1;
+}
+
+#feedback-title {
+    font-size: clamp(1.8rem, 3.5vw, 2.8rem);
+    font-weight: 900;
+    letter-spacing: 0.04em;
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+}
+
+#feedback-title.win {
+    color: #00e676;
+    text-shadow: 0 0 30px rgba(0,230,118,0.6);
+}
+
+#feedback-title.lose {
+    color: #ff5252;
+    text-shadow: 0 0 30px rgba(255,82,82,0.6);
+}
+
+#feedback-sub {
+    font-size: 0.95rem;
+    color: rgba(255,255,255,0.5);
+    margin-bottom: 1.8rem;
+    font-weight: 500;
+}
+
+.action-btn {
+    background: var(--gold);
+    color: #000;
+    border: none;
+    padding: 14px 44px;
+    font-size: 1.05rem;
+    font-family: 'Inter', sans-serif;
+    font-weight: 800;
+    border-radius: 50px;
+    cursor: pointer;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    box-shadow: 0 8px 24px rgba(255,195,0,0.45);
+    transition: all 0.2s;
+}
+
+.action-btn:hover {
+    transform: scale(1.07);
+    box-shadow: 0 12px 32px rgba(255,195,0,0.6);
+    background: #ffe066;
+}
