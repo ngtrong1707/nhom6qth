@@ -101,8 +101,8 @@ const feedbackTitle  = document.getElementById('feedback-title');
 const feedbackSub    = document.getElementById('feedback-sub');
 const modalIcon      = document.getElementById('modal-icon');
 const nextBtn        = document.getElementById('next-btn');
-const correctSound   = document.getElementById('2')
-const wrongSound     = document.getElementById('3');
+const correctSound   = document.getElementById('audio-correct');
+const wrongSound     = document.getElementById('audio-wrong');
 
 // ── CHICKEN SELECTION ──────────────────────────────
 chickenBtns.forEach(btn => {
