@@ -1,120 +1,96 @@
 <!DOCTYPE html>
 <html lang="vi">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chọn Đùi Gà – Viettel Quiz</title>
-    <link rel="stylesheet" href="style.css">
-</head>
-<body>
-    <canvas id="bg-canvas"></canvas>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Minigame Viettel - Chọn miếng gà</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <canvas id="confettiCanvas" aria-hidden="true"></canvas>
 
-    <!-- ══ HOME: CHỌN GÀ ══ -->
-    <div id="home-screen" class="screen active">
-        <div class="glass-panel">
-            <h1 class="game-title">CHỌN MIẾNG GÀ</h1>
-            <p class="subtitle">Nhấn vào một miếng gà để mở câu hỏi!</p>
-            <div class="chicken-grid">
-                <button class="chicken-btn" data-index="0">
-                    <div class="chicken-img-wrap">
-                        <img class="chicken-base" src="media/image13.png" alt="Gà 1">
-                        <div class="chicken-dark"></div>
-                    </div>
-                    <span>Gà 1</span>
-                </button>
-                <button class="chicken-btn" data-index="1">
-                    <div class="chicken-img-wrap">
-                        <img class="chicken-base" src="media/image14.png" alt="Gà 2">
-                        <div class="chicken-dark"></div>
-                    </div>
-                    <span>Gà 2</span>
-                </button>
-                <button class="chicken-btn" data-index="2">
-                    <div class="chicken-img-wrap">
-                        <img class="chicken-base" src="media/image15.png" alt="Gà 3">
-                        <div class="chicken-dark"></div>
-                    </div>
-                    <span>Gà 3</span>
-                </button>
-                <button class="chicken-btn" data-index="3">
-                    <div class="chicken-img-wrap">
-                        <img class="chicken-base" src="media/image16.png" alt="Gà 4">
-                        <div class="chicken-dark"></div>
-                    </div>
-                    <span>Gà 4</span>
-                </button>
-                <button class="chicken-btn" data-index="4">
-                    <div class="chicken-img-wrap">
-                        <img class="chicken-base" src="media/image17.png" alt="Gà 5">
-                        <div class="chicken-dark"></div>
-                    </div>
-                    <span>Gà 5</span>
-                </button>
-                <button class="chicken-btn" data-index="5">
-                    <div class="chicken-img-wrap">
-                        <img class="chicken-base" src="media/image19.png" alt="Gà 6">
-                        <div class="chicken-dark"></div>
-                    </div>
-                    <span>Gà 6</span>
-                </button>
-            </div>
+    <main class="game-shell">
+      <section class="hero">
+        <div class="hero-copy">
+          <span class="kicker">Quản trị học - Nhóm 6</span>
+          <h1>Minigame Viettel</h1>
+          <p>Chọn miếng gà, trả lời nhanh câu hỏi về Tập đoàn Công nghiệp - Viễn thông Quân đội.</p>
+          <div class="hero-actions">
+            <button class="primary-btn" id="startBtn" type="button">Bắt đầu</button>
+            <button class="ghost-btn" id="shuffleBtn" type="button" title="Đổi vị trí các miếng gà">Xáo bàn</button>
+          </div>
         </div>
-    </div>
 
-    <!-- ══ QUESTION SCREEN ══ -->
-    <div id="question-screen" class="screen">
-        <!-- Orbiting background character from Slide 1 / Slide 2 mascot -->
-        <img class="orbit-chicken" src="media/image18.png" alt="">
-
-        <div class="question-container">
-            <button id="back-btn" class="glass-btn">← Trở về</button>
-
-            <!-- Mascot inside question screen, on the right side -->
-            <img class="mascot-inline" src="media/image27.png" alt="Mascot">
-
-            <div class="q-header">
-                <span class="q-badge" id="q-title">Câu 1</span>
-            </div>
-
-            <div class="question-box">
-                <p id="q-text">Đang tải câu hỏi...</p>
-            </div>
-
-            <div class="answers-grid">
-                <button class="answer-btn">
-                    <span class="letter">A</span>
-                    <span class="text">...</span>
-                </button>
-                <button class="answer-btn">
-                    <span class="letter">B</span>
-                    <span class="text">...</span>
-                </button>
-                <button class="answer-btn">
-                    <span class="letter">C</span>
-                    <span class="text">...</span>
-                </button>
-                <button class="answer-btn">
-                    <span class="letter">D</span>
-                    <span class="text">...</span>
-                </button>
-            </div>
+        <div class="hero-art" aria-hidden="true">
+          <img class="mascot" src="./assets/chicken-mascot.png" alt="" />
+          <img class="bucket" src="./assets/fried-chicken-bucket.png" alt="" />
         </div>
-    </div>
+      </section>
 
-    <!-- ══ FEEDBACK MODAL ══ -->
-    <div id="feedback-modal" class="modal">
-        <div class="modal-content glass-panel">
-            <div class="modal-icon" id="modal-icon"></div>
-            <h1 id="feedback-title"></h1>
-            <p id="feedback-sub"></p>
-            <button id="next-btn" class="action-btn">Tiếp Tục</button>
+      <section class="scorebar" aria-label="Bảng điểm">
+        <div>
+          <span>Điểm</span>
+          <strong id="score">0</strong>
         </div>
-    </div>
+        <div>
+          <span>Đúng</span>
+          <strong id="correctCount">0/10</strong>
+        </div>
+        <div>
+          <span>Chuỗi</span>
+          <strong id="streak">0</strong>
+        </div>
+        <div>
+          <span>Tiến độ</span>
+          <strong id="progressText">0%</strong>
+        </div>
+      </section>
 
-    <audio id="audio-correct" src="media/audio1.wav"></audio>
-    <audio id="audio-wrong"   src="media/audio2.wav"></audio>
+      <section class="board" id="board" aria-label="Bàn chọn câu hỏi"></section>
+    </main>
 
-    <script src="bg.js"></script>
-    <script src="app.js"></script>
-</body>
+    <dialog class="question-dialog" id="questionDialog">
+      <article class="question-card">
+        <button class="icon-btn close-btn" id="closeDialog" type="button" aria-label="Đóng">×</button>
+
+        <header class="question-header">
+          <div>
+            <span class="pill" id="questionLevel">Dễ</span>
+            <span class="source" id="questionSource">PDF</span>
+          </div>
+          <div class="timer" aria-live="polite">
+            <span id="timerValue">30</span>
+          </div>
+        </header>
+
+        <h2 id="questionText"></h2>
+        <div class="answers" id="answers"></div>
+
+        <section class="result-panel" id="resultPanel" hidden>
+          <img id="resultIcon" alt="" />
+          <div>
+            <strong id="resultTitle"></strong>
+            <p id="resultExplain"></p>
+          </div>
+        </section>
+
+        <footer class="question-footer">
+          <button class="ghost-btn" id="retryBtn" type="button" hidden>Trả lời lại</button>
+          <button class="ghost-btn" id="nextBtn" type="button" hidden>Câu khác</button>
+        </footer>
+      </article>
+    </dialog>
+
+    <dialog class="final-dialog" id="finalDialog">
+      <article class="final-card">
+        <img src="./assets/fried-chicken-pieces.png" alt="" />
+        <span class="kicker">Hoàn thành</span>
+        <h2 id="finalTitle">Kết quả</h2>
+        <p id="finalText"></p>
+        <button class="primary-btn" id="restartBtn" type="button">Chơi lại</button>
+      </article>
+    </dialog>
+
+    <script src="./script.js"></script>
+  </body>
 </html>
